@@ -1,7 +1,7 @@
 package generators.utils
 
-import scala.slick.ast.ColumnOption.AutoInc
-import scala.slick.model.Column
+import slick.ast.ColumnOption.AutoInc
+import slick.model.Column
 
 trait GeneratorHelpers extends StringUtils {
 

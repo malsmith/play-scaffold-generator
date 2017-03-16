@@ -12,16 +12,20 @@ object PlayScaffoldGenBuild extends Build {
    Seq(
     organization := "com.github.pslaski",
     name := "play-scaffold-generator",
-    version := "0.1.0",
+    version := "0.2.0",
     scalaVersion := "2.10.4",
     sbtPlugin := true,
     libraryDependencies ++= Seq(slick, slickCodegen, typesafeConfig, postgresqlJDBCDriver, mysqlJDBCDriver)
   )
 
+  val scalaXML = "org.scala-lang.modules" %% "scala-xml" % "1.0.1"
+  
+  val slick = "com.typesafe.slick" %% "slick" % "3.1.1"
+  
   // Dependencies
-  val slick = "com.typesafe.slick" %% "slick" % "2.1.0"
+  // val slick = "com.typesafe.slick" %% "slick" % "2.1.0"
 
-  val slickCodegen = "com.typesafe.slick" %% "slick-codegen" % "2.1.0"
+  val slickCodegen = "com.typesafe.slick" %% "slick-codegen" % "3.1.1"
 
   val typesafeConfig =  "com.typesafe" % "config" % "1.2.1"
 

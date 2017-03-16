@@ -2,7 +2,7 @@ package generators.models.anorm
 
 import generators.utils._
 
-import scala.slick.model.{Column, Model}
+import slick.model.{Column, Model}
 
 object ClassesAndParsersGenerator {
   def generate(outputFolder : String) = {

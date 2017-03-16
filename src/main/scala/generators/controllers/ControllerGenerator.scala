@@ -1,6 +1,6 @@
 package generators.controllers
 
-import scala.slick.model.{ForeignKey, Column, Table}
+import slick.model.{ForeignKey, Column, Table}
 import generators.utils._
 
 object ControllerGenerator {

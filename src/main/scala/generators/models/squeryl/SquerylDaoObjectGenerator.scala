@@ -2,8 +2,8 @@ package generators.models.squeryl
 
 import generators.utils._
 
-import scala.slick.model.ForeignKeyAction.{NoAction, Restrict}
-import scala.slick.model.{Column, Table}
+import slick.model.ForeignKeyAction.{NoAction, Restrict}
+import slick.model.{Column, Table}
 
 object SquerylDaoObjectGenerator {
   def generate(outputFolder : String) = {

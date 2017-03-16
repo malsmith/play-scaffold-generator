@@ -2,7 +2,7 @@ package generators.models.squeryl
 
 import generators.utils._
 
-import scala.slick.model.{Column, Model}
+import slick.model.{Column, Model}
 
 object SchemaGenerator {
   def generate(outputFolder : String) = {

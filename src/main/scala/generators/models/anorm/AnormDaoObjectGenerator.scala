@@ -2,9 +2,9 @@ package generators.models.anorm
 
 import generators.utils._
 
-import scala.slick.model.{Column, Table}
+import slick.model.{Column, Table}
 
-import scala.slick.model.ForeignKeyAction._
+import slick.model.ForeignKeyAction._
 
 object AnormDaoObjectGenerator {
   def generate(outputFolder : String) = {

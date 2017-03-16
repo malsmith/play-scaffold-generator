@@ -1,6 +1,6 @@
 package generators.views
 
-import scala.slick.model.Table
+import slick.model.Table
 import generators.css.MainCssGenerator
 import generators.utils._
 

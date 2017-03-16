@@ -2,7 +2,7 @@ package generators.views
 
 import generators.utils.TableInfo
 
-import scala.slick.model.{ForeignKey, Column, Table}
+import slick.model.{ForeignKey, Column, Table}
 
 class EditFormViewGenerator(table : Table) extends ViewHelpers with FormViewGeneratorHelpers {
 

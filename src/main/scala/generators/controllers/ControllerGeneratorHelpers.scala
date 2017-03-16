@@ -2,7 +2,7 @@ package generators.controllers
 
 import generators.utils.{GeneratorHelpers, TableInfo, StringUtils}
 
-import scala.slick.model.{ForeignKey, Column}
+import slick.model.{ForeignKey, Column}
 
 trait ControllerGeneratorHelpers extends GeneratorHelpers{
 

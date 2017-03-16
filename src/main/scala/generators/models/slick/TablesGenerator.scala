@@ -14,7 +14,7 @@ object TablesGenerator{
     val slickDriverPath = appConfig.slickDriverPath
 
     val mainModel = modelProvider.model
-    val codegen = new scala.slick.codegen.SourceCodeGenerator(mainModel)
+    val codegen = new slick.codegen.SourceCodeGenerator(mainModel)
     codegen.writeToFile(slickDriverPath, outputFolder, pkg)
   }
 }

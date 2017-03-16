@@ -1,6 +1,6 @@
 package generators.utils
 
-import scala.slick.driver._
+import slick.driver._
 
 object DriverLoader {
   
@@ -13,7 +13,7 @@ object DriverLoader {
     "org.sqlite.JDBC" -> SQLiteDriver)
   
 
-  def slickDriver(jdbcDriver : String) : JdbcDriver = jdbcToSlickDriver.get(jdbcDriver) getOrElse(JdbcDriver)
+  def slickDriver(jdbcDriver : String) : JdbcDriver = jdbcToSlickDriver.get(jdbcDriver) getOrElse(H2Driver)
   
   def slickDriverPath(jdbcDriver : String) : String = slickDriver(jdbcDriver).getClass().getCanonicalName().takeWhile(_ != '$')
 

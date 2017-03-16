@@ -4,7 +4,7 @@ import java.io.File
 
 import com.typesafe.config.Config
 
-import scala.slick.driver.JdbcProfile.capabilities
+import slick.driver.JdbcProfile.capabilities
 
 object AppConfigParser extends ConfigUtils{
 
@@ -24,13 +24,13 @@ class AppConfig(config : Config, appName : String) extends ConfigUtils{
 
   val applicationName = appName
   
-	val jdbcDriver = getStringOrDefault("db.default.driver", config, "org.h2.Driver")
+	val jdbcDriver = getStringOrDefault("db.default.driver", config, getStringOrDefault("slick.dbs.default.db.driver",config, "org.h2.Driver"))
 	
-	val url = getStringOrDefault("db.default.url", config, "jdbc:h2:mem:play")
+	val url = getStringOrDefault("db.default.url", config, getStringOrDefault("slick.dbs.default.db.url",config, "jdbc:h2:mem:play"))
 	
-	val user = getStringOrDefault("db.default.user", config)
+	val user = getStringOrDefault("db.default.user", config,getStringOrDefault("slick.dbs.default.db.user",config))
 	
-	val password = getStringOrDefault("db.default.password", config)
+	val password = getStringOrDefault("db.default.password", config,getStringOrDefault("slick.dbs.default.db.password",config))
 	
 	val modelsPackage = getStringOrDefault("generator.default.modelsDir", config, "models")
 

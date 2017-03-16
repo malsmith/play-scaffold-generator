@@ -2,7 +2,7 @@ package generators.views
 
 import generators.utils.{TableInfo, GeneratorHelpers}
 
-import scala.slick.model.{Table, Column}
+import slick.model.{Table, Column}
 
 class ListViewGenerator(table : Table) extends ViewHelpers with GeneratorHelpers{
 

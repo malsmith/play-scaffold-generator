@@ -2,7 +2,7 @@ package generators.views
 
 import generators.utils.GeneratorHelpers
 
-import scala.slick.model.{ForeignKey, Column}
+import slick.model.{ForeignKey, Column}
 
 trait FormViewGeneratorHelpers extends GeneratorHelpers{
 

@@ -2,7 +2,7 @@ package generators.models.anorm
 
 import generators.utils.{TableInfo, GeneratorHelpers}
 
-import scala.slick.model.{Column, ForeignKey}
+import slick.model.{Column, ForeignKey}
 
 trait AnormDaoGeneratorHelpers extends GeneratorHelpers{
 

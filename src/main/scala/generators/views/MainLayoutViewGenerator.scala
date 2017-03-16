@@ -1,6 +1,6 @@
 package generators.views
 
-import scala.slick.model.Model
+import slick.model.Model
 import generators.utils.{AppConfigParser, TableInfo, StringUtils, OutputHelpers}
 
 class MainLayoutViewGenerator(model : Model) extends OutputHelpers with StringUtils{

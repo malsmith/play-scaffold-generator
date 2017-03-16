@@ -1,6 +1,6 @@
 package generators.utils
 
-import scala.slick.model.{Column, ForeignKey, Table}
+import slick.model.{Column, ForeignKey, Table}
 
 class TableInfo(val table : Table) extends GeneratorHelpers{
 
@@ -24,7 +24,7 @@ class TableInfo(val table : Table) extends GeneratorHelpers{
 
   val parserName : String = nameCamelCased + "Parser"
 
-  val primaryKeyOpt = columns.find(_.options.contains(scala.slick.ast.ColumnOption.PrimaryKey))
+  val primaryKeyOpt = columns.find(_.options.contains(slick.ast.ColumnOption.PrimaryKey))
 
   val primaryKeyColumns : Seq[Column]= {
     table.primaryKey match {
@@ -91,6 +91,6 @@ class TableInfo(val table : Table) extends GeneratorHelpers{
 
   val isSimpleJunctionTable = defaultIsJunctionTableCheck
 
-  private def defaultIsJunctionTableCheck : Boolean = table.primaryKey.isEmpty && !columns.exists(_.options.contains(scala.slick.ast.ColumnOption.PrimaryKey)) && foreignKeys.length == 2
+  private def defaultIsJunctionTableCheck : Boolean = table.primaryKey.isEmpty && !columns.exists(_.options.contains(slick.ast.ColumnOption.PrimaryKey)) && foreignKeys.length == 2
 
 }

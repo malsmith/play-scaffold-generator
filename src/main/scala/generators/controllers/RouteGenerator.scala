@@ -1,7 +1,7 @@
 package generators.controllers
 
 import generators.utils.{GeneratorHelpers, TableInfo, ForeignKeyInfo, OutputHelpers}
-import scala.slick.model.{Column, Model, Table}
+import slick.model.{Column, Model, Table}
 
 class RouteGenerator(model : Model, foreignKeyInfo : ForeignKeyInfo) extends OutputHelpers {
 

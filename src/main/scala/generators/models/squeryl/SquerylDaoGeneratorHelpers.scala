@@ -2,7 +2,7 @@ package generators.models.squeryl
 
 import generators.utils.{TableInfo, GeneratorHelpers}
 
-import scala.slick.model.{Column, ForeignKey}
+import slick.model.{Column, ForeignKey}
 
 trait SquerylDaoGeneratorHelpers extends GeneratorHelpers{
 
