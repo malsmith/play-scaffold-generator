@@ -15,12 +15,23 @@ trait GeneratorHelpers extends StringUtils {
     standardColumnName(column.name) + " : " + column.tpe
   }.mkString(", ")
 
+  def makeArgsWithTypesAutoInc(columns : Seq[Column]) : String = columns.map {column =>
+  	val colType = column.tpe
+    standardColumnName(column.name) + " : " + (if (column.options.contains(slick.ast.ColumnOption.AutoInc)) s"Option[${colType}]"  else  colType)  
+  }.mkString(", ")
+
+  
   def makeArgsWithColumnTypes(columns : Seq[Column]) : String = columns.map {column =>
     standardColumnName(column.name) + " : Column[" + column.tpe + "]"
   }.mkString(", ")
 
   def makeArgsWithoutTypes(columns : Seq[Column]) : String = columns.map {column =>
     standardColumnName(column.name)
+  }.mkString(", ")
+
+  def makeArgsWithoutTypesAutoInc(columns : Seq[Column]) : String = columns.map {column =>
+  	val colName = standardColumnName(column.name)
+    if (column.options.contains(slick.ast.ColumnOption.AutoInc)) s"Some(${colName})" else colName 
   }.mkString(", ")
 
   def makeArgsTypes(columns : Seq[Column]) : String = columns.map {column =>

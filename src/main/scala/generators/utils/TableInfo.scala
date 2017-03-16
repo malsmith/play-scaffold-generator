@@ -18,6 +18,8 @@ class TableInfo(val table : Table) extends GeneratorHelpers{
 
   val daoObjectName : String = nameCamelCased + "Dao"
 
+  val modelObjectName : String = nameCamelCased.capitalize
+
   val tableRowName : String = nameCamelCased + "Row"
 
   val queryObjectName : String = nameCamelCased

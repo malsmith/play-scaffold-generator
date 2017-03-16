@@ -18,11 +18,19 @@ class ModelProvider(config : AppConfig) {
   lazy val db = slickDriver.backend.Database.forURL(url,driver=jdbcDriver, user = user, password = password)
   lazy val model = { 
     val xtables = slickDriver.defaultTables
-    // MALCOLM SMITH 
-    // x = for( tbl <- xtables if tbl.
-    // val result = Await.result(xtables, Duration.Inf)
-    // val tables = result.filterNot(t => !excluded.exists(_.equalsIgnoreCase(t.name.name)))
-    val output = slickDriver.createModel(Some(xtables))
+    val ytables = xtables.map(tbl => tbl.filter(
+    		meta => !(excluded.exists (_.equalsIgnoreCase(meta.name.name))
+    		)))
+
+//DEBUG    		
+//    val ztables = xtables.map(tbl => tbl.filter(
+//    		meta => (meta.name.name != "play_evolutions")
+//    		&& !(excluded.exists (_.equalsIgnoreCase(meta.name.name))
+//    		)))
+//    
+//     val lresult = Await.result(db.run(ztables),Duration.Inf)
+//     lresult.foreach(r => println("name field=%s name=%s type=%s".format(r.name.name, r.name,r.typeName)))
+    val output = slickDriver.createModel(Some(ytables))
     Await.result(db.run(output), Duration.Inf)
   }
 

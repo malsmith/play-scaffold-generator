@@ -37,6 +37,8 @@ class SlickDaoObjectGenerator(table : Table, foreignKeyInfo : ForeignKeyInfo) ex
   override val queryObjectName: String = mainTableInfo.queryObjectName
 
   val objectName = mainTableInfo.daoObjectName
+  
+  val modelObjectName = mainTableInfo.modelObjectName
 
   override val fieldsForSimpleName = {
     mainTableInfo.selectColumns.map{ col =>
@@ -51,7 +53,15 @@ class SlickDaoObjectGenerator(table : Table, foreignKeyInfo : ForeignKeyInfo) ex
 
   def objectCode : String = {
     s"""
-object ${objectName} {
+import javax.inject.{ Inject, Singleton }
+
+import models.Tables.${modelObjectName}Row
+import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
+import slick.driver.JdbcProfile
+import scala.concurrent.Future
+
+@Singleton()
+class ${modelObjectName}Dao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) extends Tables with HasDatabaseConfigProvider[JdbcProfile] {
 
 ${imports}
 
@@ -61,9 +71,7 @@ ${methods}
   }
 
   def imports : String = {
-    Seq(importCode("utils.DbSession._"),
-        importCode("Tables._"),
-        importCode("Tables.profile.simple._"))
+    Seq(importCode("driver.api._"))
         .mkString("\n")
   }
 
@@ -85,7 +93,7 @@ ${methods}
     val saveMethod : String= {
       val autoIncCol = primaryKeyColumns.find(isAutoIncColumn(_))
       autoIncCol match {
-        case Some(col) => saveReturnIdMethodCode(standardColumnName(col.name))
+        case Some(col) => saveReturnIdMethodCode(col)
         case None => saveSimpleMethodCode
       }
     }

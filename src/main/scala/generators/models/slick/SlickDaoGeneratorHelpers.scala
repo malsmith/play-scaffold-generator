@@ -18,47 +18,81 @@ trait SlickDaoGeneratorHelpers extends GeneratorHelpers{
 
   val fieldsForSimpleName : Seq[String]
   
-  def saveReturnIdMethodCode(autoIncId : String) = {
-    
-    s"""
-def save(${rowName}: ${tableRowName}) : ${tableRowName} = {
-  ${queryObjectName} returning ${queryObjectName}.map(_.${autoIncId}) into((row, id) => row.copy(${autoIncId} = id)) insert(${rowName})
+  def saveReturnIdMethodCode(autoIncId : Column) = {
+  	val tmpColumns = List(autoIncId)
+  	val returnType = makeArgsTypes(tmpColumns)  
+  	val idNames = if (tmpColumns.length == 1) makeArgsWithObjectWithoutTypes("_", tmpColumns) else "(" +  makeArgsWithObjectWithoutTypes("row", tmpColumns)+")" 
+
+  	s"""
+def save(${rowName}: ${tableRowName}) : Future[$returnType] = db.run {
+  this.${queryObjectName} += ${rowName}
+}
+def insertAll(${rowName}List: List[${tableRowName}]) : Future[Seq[$returnType]] = db.run {
+	val tmpInsert = this.${queryObjectName} returning this.${queryObjectName}.map(${idNames})
+  tmpInsert ++= ${rowName}List
 }""".trim()
   }
 
   def saveSimpleMethodCode = {
+/*
+ * def save(employee: EmployeeRow) : EmployeeRow = {
+  Employee returning Employee.map(_.id) into((row, id) => row.copy(id = id)) insert(employee)
+}
+	def save(employee: EmployeeRow): Future[Int] = db.run {
+		this.Employee += employee
+		// Employee += employee
+		// Employee returning Employee.map(_.id) into((row, id) => row.copy(id = id)) insert(employee)
+	}
 
+ * 
+ */
+  	val returnType = if (primaryKeyColumns.length == 1) makeArgsTypes(primaryKeyColumns) else "(" + makeArgsTypes(primaryKeyColumns)+")" 
+  	val idNames = if (primaryKeyColumns.length == 1) makeArgsWithObjectWithoutTypes("_", primaryKeyColumns) else "(" +  makeArgsWithObjectWithoutTypes("row", primaryKeyColumns)+")" 
+  	
     s"""
-def save(${rowName}: ${tableRowName}) : ${tableRowName} = {
-  ${queryObjectName} insert(${rowName})
-  ${rowName}
+def save(${rowName}: ${tableRowName}) : Future[$returnType] = db.run {
+	this.${queryObjectName} returning this.${queryObjectName}.map(_.id)
+  this.${queryObjectName} += ${rowName}
+}
+
+def insertAll(${rowName}List: Seq[${tableRowName}]) : Future[Seq[$returnType]] = db.run {
+	val tmpInsert = this.${queryObjectName} returning this.${queryObjectName}.map(${idNames})
+  tmpInsert ++= ${rowName}List
 }""".trim()
   }
   
   def findAllMethodCode = {
     s"""
-def findAll : List[${tableRowName}] = {
-  ${queryObjectName}.list
+def findAll = db.run {
+  ${queryObjectName}.to[List].result
 }""".trim()
   }
   
   def findByPrimaryKeyMethodCode = {
 
-    val methodArgs = makeArgsWithTypes(primaryKeyColumns)
+    val methodArgs = makeArgsWithTypesAutoInc(primaryKeyColumns)
 
     val queryName = makeFindByQueryCompiledMethodName(primaryKeyColumns)
 
     val queryArgs = makeArgsWithoutTypes(primaryKeyColumns)
-
+/*
+ * 	def findByIdQuery(id: Int) = db.run {
+		this.Employee.filter(_.id === id).result.headOption
+	}
+def findByIdQuery(id : Column[Int]) = {
+  Employee.filter(row => row.id === id)
+}
+ * 
+ */
     s"""
-def findByPrimaryKey(${methodArgs}) : Option[${tableRowName}] = {
-  ${queryName}(${queryArgs}).firstOption
+def findByPrimaryKey(${methodArgs}) = db.run {
+  this.${queryName}(${queryArgs}).result.headOption
 }""".trim()
   }
   
   def deleteMethodCode(childData : Seq[(TableInfo, ForeignKey)]) = {
 
-    val methodArgs = makeArgsWithTypes(primaryKeyColumns)
+    val methodArgs = makeArgsWithTypesAutoInc(primaryKeyColumns)
 
     val queryArgs = makeArgsWithoutTypes(primaryKeyColumns)
 
@@ -66,7 +100,6 @@ def findByPrimaryKey(${methodArgs}) : Option[${tableRowName}] = {
 
     val childsCode = {
       if(childData.nonEmpty){
-
 s"""
   val objOption = findByPrimaryKey(${queryArgs})
 
@@ -76,13 +109,12 @@ s"""
     }
     case None => "Not finded"
   }
-
 """.trim()
       } else ""
     }
 
     s"""
-def delete(${methodArgs}) = {
+def delete(${methodArgs}) = db.run {
   ${childsCode}
   ${findQuery}(${queryArgs}).delete
 }""".trim()
@@ -108,7 +140,7 @@ def delete(${methodArgs}) = {
     }.mkString(" && ")
 
     s"""
-def delete(${idColumns}) = {
+def delete(${idColumns}) = db.run {
 
   val queryFindById = for {
       row <- ${queryObjectName} if ${findingColumns}
@@ -132,20 +164,32 @@ def update(updatedRow: ${tableRowName}) = {
 
   def findByQueryMethodCode(columns : Seq[Column]) = {
 
-    val args = makeArgsWithColumnTypes(columns)
+    val args = makeArgsWithTypesAutoInc(columns)
 
     val rowComparingArgs = makeSlickRowComparing(columns)
 
     val methodName = makeFindByQueryMethodName(columns)
 
     val compiledName = makeFindByQueryCompiledMethodName(columns)
-
+    
+    val compiledArgs = makeArgsWithoutTypes(columns)
+/*
+ * 	def findByIdQuery(id: Int) = db.run {
+		this.Employee.filter(_.id === id).result.headOption
+	}
+def findByIdQuery(id : Column[Int]) = {
+  Employee.filter(row => row.id === id)
+}
+ * 
+ */
   s"""
-def ${methodName}(${args}) = {
-  ${queryObjectName}.filter(row => ${rowComparingArgs})
+def ${compiledName}(${args}) = {
+  this.${queryObjectName}.filter(row => ${rowComparingArgs})
 }
 
-val ${compiledName} = Compiled(${methodName} _)
+def ${methodName}(${args}) = db.run {
+  ${compiledName}(${compiledArgs}).result.headOption
+}
 """.trim()
   }
 
@@ -160,15 +204,15 @@ val ${compiledName} = Compiled(${methodName} _)
     val compiledArgs = makeArgsWithoutTypes(columns)
 
   s"""
-def ${methodName}(${args}) : List[${tableRowName}] = {
-  ${compiledName}(${compiledArgs}).list
+def ${methodName}(${args}) = db.run {
+  ${compiledName}(${compiledArgs}).to[List].result
 }
 """.trim()
   }
 
   def findByUniqueMethodCode(columns : Seq[Column]) = {
 
-    val args = makeArgsWithTypes(columns)
+    val args = makeArgsWithTypesAutoInc(columns)
 
     val methodName = makeFindByMethodName(columns)
 
@@ -177,15 +221,15 @@ def ${methodName}(${args}) : List[${tableRowName}] = {
     val compiledArgs = makeArgsWithoutTypes(columns)
 
   s"""
-def ${methodName}(${args}) : Option[${tableRowName}] = {
-  ${compiledName}(${compiledArgs}).firstOption
+def ${methodName}(${args}) = db.run {
+  ${compiledName}(${compiledArgs}).result.headOption
 }
 """.trim()
   }
 
   def deleteByMethodCode(columns : Seq[Column]) = {
 
-    val args = makeArgsWithTypes(columns)
+    val args = makeArgsWithTypesAutoInc(columns)
 
     val methodName = makeDeleteByMethodName(columns)
 
@@ -194,8 +238,8 @@ def ${methodName}(${args}) : Option[${tableRowName}] = {
     val compiledArgs = makeArgsWithoutTypes(columns)
 
   s"""
-def ${methodName}(${args}) = {
-  ${compiledName}(${compiledArgs}).delete
+def ${methodName}(${args}) = db.run {
+	${compiledName}(${compiledArgs}).delete
 }
 """.trim()
   }
