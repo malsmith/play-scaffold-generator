@@ -22,7 +22,6 @@ object TablesGenerator{
     val mainModel = modelProvider.model
     val codegen = new slick.codegen.SourceCodeGenerator(mainModel) {
     	override def Table = new Table(_) {
-    		var entityFlag = true
 	    	override def autoIncLastAsOption = true
 				override def definitions = Seq[Def](EntityType, PlainSqlMapper, TableClass, TableValue )
 				/** Generates the complete code for this table and its subordinate generators.
@@ -32,7 +31,7 @@ object TablesGenerator{
     	  
     	
     	override def code = {
-    "import slick.model.ForeignKeyAction\nMALCOLM\n" +
+    "import slick.model.ForeignKeyAction\n" +
     ( if(tables.exists(_.hlistEnabled)){
         "import slick.collection.heterogeneous._\n"+
         "import slick.collection.heterogeneous.syntax._\n"
@@ -60,8 +59,17 @@ object TablesGenerator{
     tables.map(_.code.mkString("\n")).mkString("\n\n")
   }
 
+    	// "(?s)(// case class.*\n)/\\*\\* GetResult".r.findAllMatchIn(test).map(x => x.group(1))
+    	// "(?s)(// case class.*\n)/\\*\\* GetResult".r.replaceAllIn(test, "/** GetResult")
     	// Seq[Def](EntityType).flatMap(_.getEnabled).map(_.docWithCode)
     	override def packageCode(profile: String, pkg: String, container: String, parentType: Option[String]) : String = {
+    		val test = code
+    		// /** Entity class storing rows of table
+    		val caseClassCode = "(?s)(/\\*\\* Entity class storing rows of table.*?\n)/\\*\\* GetResult implicit for".r
+    				.findAllMatchIn(test).map(x => x.group(1))
+    				.mkString("\n")
+    		val remainingCode = "(?s)(/\\*\\* Entity class storing rows of table.*?\n)/\\*\\* GetResult implicit for".r
+    				.replaceAllIn(test, "/** GetResult")
       s"""
 package ${pkg}
 // AUTO-GENERATE Slick data model
@@ -72,12 +80,14 @@ object ${container}Def extends {
 class ${container}Def extends {
   val profile = $profile
 } with ${container}
-// case class EmployeeRow(name: String, email: String, companyName: String, position: String, test: Option[java.util.UUID] = None, id: Option[Int] = None)
+// Case Classes HERE
+${caseClassCode}
 /** Slick data model trait for extension, choice of backend or usage in the cake pattern. (Make sure to initialize this late.) */
 trait ${container}${parentType.map(t => s" extends $t").getOrElse("")} {
   val profile: slick.driver.JdbcProfile
   import profile.api._
-  ${indent(code)}
+  // SUPPORTING CONVERTERS
+  ${indent(remainingCode)}
 }
       """.trim()
     	}

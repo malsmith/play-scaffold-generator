@@ -55,13 +55,13 @@ class SlickDaoObjectGenerator(table : Table, foreignKeyInfo : ForeignKeyInfo) ex
     s"""
 import javax.inject.{ Inject, Singleton }
 
-import models.Tables.${modelObjectName}Row
+import models._
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.driver.JdbcProfile
 import scala.concurrent.Future
 
 @Singleton()
-class ${modelObjectName}Dao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) extends Tables with HasDatabaseConfigProvider[JdbcProfile] {
+class ${modelObjectName}Dao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) extends TablesDef with HasDatabaseConfigProvider[JdbcProfile] {
 
 ${imports}
 
