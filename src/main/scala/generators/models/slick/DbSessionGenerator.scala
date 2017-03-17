@@ -6,17 +6,17 @@ object DbSessionGenerator extends OutputHelpers {
 
   def code : String = {
     s"""
-import models.Tables
-import Tables.profile.simple._
-import play.api.db.DB
-import play.api.Play.current
+// import models.Tables
+// import Tables.profile.simple._
+// import play.api.db.DB
+// import play.api.Play.current
 
 //auto-generated object providing implicit db session
-object DbSession {
-
-  implicit lazy val session : Session = Database.forDataSource(DB.getDataSource()).createSession()
-
-}
+// object DbSession {
+// 
+//   implicit lazy val session : Session = Database.forDataSource(DB.getDataSource()).createSession()
+// 
+// }
     """.trim()
   }
   
