@@ -155,10 +155,11 @@ def delete(${idColumns}) = db.run {
     val queryName = makeFindByQueryCompiledMethodName(primaryKeyColumns)
 
     val queryArgs = makeArgsWithObjectWithoutTypes("updatedRow", primaryKeyColumns)
+    val rowArgs = makeArgsWithObjectWithoutTypes("_", primaryKeyColumns)
 
     s"""
-def update(updatedRow: ${tableRowName}) = {
-  ${queryName}(${queryArgs}).update(updatedRow)
+def update(updatedRow: ${tableRowName}) = db.run {
+  this.${queryObjectName}.filter(${rowArgs} === ${queryArgs}).update(updatedRow)
 }""".trim()
   }
 
