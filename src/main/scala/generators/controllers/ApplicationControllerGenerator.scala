@@ -6,10 +6,11 @@ object ApplicationControllerGenerator extends OutputHelpers{
 
   def code : String = {
     s"""
-import play.api._
 import play.api.mvc._
+// import play.api.mvc.Session._
+import views.html
 
-object Application extends Controller {
+class Application extends Controller {
 
   def index = Action {
     Ok(views.html.index())

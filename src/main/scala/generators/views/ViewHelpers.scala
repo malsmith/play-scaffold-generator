@@ -31,7 +31,7 @@ trait ViewHelpers extends OutputHelpers with StringUtils{
 
   def code = {
     s"""
-${viewArguments}
+${viewArguments}(implicit messages: Messages)
 
 ${imports}
 

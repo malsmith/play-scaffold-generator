@@ -42,7 +42,7 @@ class ShowViewGenerator(table : Table, foreignKeyInfo : ForeignKeyInfo) extends 
     (listName, s"List[Tables.${tabInfo.tableRowName}]")
   }
 
-  override val arguments = Seq((tableName, "Tables." + tableRowName)) ++ childsViewArgs
+  override val arguments = Seq((tableName, "models." + tableRowName)) ++ childsViewArgs
 
   override def imports: String = ""
 
@@ -149,8 +149,8 @@ class ShowViewGenerator(table : Table, foreignKeyInfo : ForeignKeyInfo) extends 
     s"""
 <div class="pull-right btn-group">
   <a href="@routes.${controllerName}.list" class="btn btn-success btn-xs">List</a>
-  <a href="@routes.${controllerName}.edit(${buttonsArgs})" class="btn btn-warning btn-xs">Edit</a>
-  <a href="@routes.${controllerName}.delete(${buttonsArgs})" class="btn btn-danger btn-xs">Delete</a>
+  <a href="@routes.${controllerName}.edit(${buttonsArgs}.get)" class="btn btn-warning btn-xs">Edit</a>
+  <a href="@routes.${controllerName}.delete(${buttonsArgs}.get)" class="btn btn-danger btn-xs">Delete</a>
 </div>
 """.trim()
   }

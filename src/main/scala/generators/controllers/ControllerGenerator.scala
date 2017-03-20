@@ -2,6 +2,7 @@ package generators.controllers
 
 import slick.model.{ForeignKey, Column, Table}
 import generators.utils._
+import slick.ast.ColumnOption
 
 object ControllerGenerator {
   def generate(outputFolder : String) = {
@@ -33,6 +34,8 @@ class ControllerGenerator(table : Table, foreignKeyInfo : ForeignKeyInfo) extend
   override val tableName: String = mainTableInfo.name
 
   val columns = mainTableInfo.columns
+  
+  val autoIncColumns = mainTableInfo.autoIncColumns
 
   val tableRowName = mainTableInfo.tableRowName
 
@@ -40,7 +43,9 @@ class ControllerGenerator(table : Table, foreignKeyInfo : ForeignKeyInfo) extend
 
   override val controllerName = mainTableInfo.controllerName
 
-  override val daoObjectName = mainTableInfo.daoObjectName
+  override val daoObjectName = mainTableInfo.daoObjectName.uncapitalize
+  
+  val daoTypeName = mainTableInfo.daoObjectName
 
   override val viewsPackage = mainTableInfo.viewsPackage
 
@@ -79,7 +84,8 @@ ${objectCode(controllerName)}
 
   def objectCode(objectName : String) : String = {
     s"""
-object ${objectName} extends Controller {
+class ${objectName} @Inject()(${daoObjectName}: ${daoTypeName}, val messagesApi: MessagesApi) extends Controller with I18nSupport {      
+// object  extends Controller {
 
   ${form}
 
@@ -96,7 +102,17 @@ object ${objectName} extends Controller {
         importCode("play.api.data.format.Formats._"),
         importCode("utils.CustomFormats._"),
         importCode(modelsPackage + "._"),
-        importCode(modelsPackage + ".Tables._"))
+				importCode("com.google.inject.Inject"),
+				importCode("views._"),
+				importCode("play.api.mvc.Flash._"),
+				importCode("play.api.i18n.I18nSupport"),
+				importCode("play.api.i18n.MessagesApi"),
+				importCode("scala.concurrent.Future"),
+				importCode("scala.concurrent.Await"),
+				importCode("scala.concurrent.duration._"),
+				importCode("play.api.libs.concurrent.Execution.Implicits.defaultContext")
+				)
+        
         .mkString("\n")
   }
 
@@ -138,7 +154,7 @@ object ${objectName} extends Controller {
     s"""
 Form(
       mapping(
-          ${(columns map printFormField).mkString(",\n\t\t\t\t\t")}
+          ${(autoIncColumns map printFormField).mkString(",\n\t\t\t\t\t")}
           )(${tableRowName}.apply)(${tableRowName}.unapply)
       )""".trim()
 
@@ -149,7 +165,7 @@ Form(
   }
 
   def typeCode(field : Column) = {
-    if(field.nullable)
+    if(field.nullable || field.options.contains(ColumnOption.AutoInc))
       "optional(" + convertTypeToMapping(field.tpe) + ")"
     else convertTypeToMapping(field.tpe)
   }
@@ -166,11 +182,14 @@ Form(
       case "Short" => "of[Short]"  // need formatter
       case "Float" => "of[Float]"
       case "Double" => "of[Double]"
+      case "java.util.UUID" => "uuid"
       case "java.sql.Blob" => "of[java.sql.Blob]" // need formatter
       case "java.sql.Time" => "of[java.sql.Time]" // need formatter
       case "java.sql.Timestamp" => "of[java.sql.Timestamp]" // need formatter
       case "java.sql.Clob" => "of[java.sql.Clob]" // need formatter
-      case _ => "text"
+      case _ => {
+      	println("missing type mapping for form %s".format(tpe))
+      	"text" }
     }
   }
 

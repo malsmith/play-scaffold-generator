@@ -34,7 +34,6 @@ object ScaffoldPlugin extends Plugin {
     TablesGenerator.generate(outputDir)
 
     stream.log.info("Generating tables completed....")
-    
     DbSessionGenerator.writeToFile(outputDir, appConfig.utilsPackage)
 
     stream.log.info("Generating DB session helper completed....")
@@ -54,7 +53,6 @@ object ScaffoldPlugin extends Plugin {
     ViewGenerator.generate(outputDir)
 
     stream.log.info("Generating views and css completed....")
-
   }
 
   // squeryl code generation task

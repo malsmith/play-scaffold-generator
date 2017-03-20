@@ -24,22 +24,24 @@ trait ControllerGeneratorHelpers extends GeneratorHelpers{
 
   def indexMethod = {
     s"""
-def index = Action {
-  Redirect(routes.${controllerName}.list)
+def index = Action.async {
+  Future(Redirect(routes.${controllerName}.list))
 }""".trim()
   }
 
   def indexJunctionMethod = {
     s"""
-def index = Action {
+def index = Action.async {
   Redirect(routes.${controllerName}.create)
 }""".trim()
   }
 
   def listMethod = {
     s"""
-def list = Action {
-  Ok(views.html.${viewsPackage}.list(${daoObjectName}.findAll))
+def list = Action.async {
+	${daoObjectName}.findAll.map { res =>
+  	Ok(views.html.${viewsPackage}.list(res))
+  }
 }""".trim()
   }
 
@@ -55,14 +57,15 @@ def create = Action { implicit request =>
     val showArgs = makeArgsWithObjectWithoutTypes("row", primaryKeyColumns)
 
     s"""
-def save = Action { implicit request =>
+def save = Action.async { implicit request =>
   ${formName}.bindFromRequest.fold(
       formWithErrors => {
-      BadRequest(views.html.${viewsPackage}.createForm(formWithErrors${formOptions}))
+      Future(BadRequest(views.html.${viewsPackage}.createForm(formWithErrors${formOptions})))
     },
     formData => {
-      val row = ${daoObjectName}.save(formData)
-      Redirect(routes.${controllerName}.show(${showArgs}))
+      ${daoObjectName}.save(formData).map ( res =>
+      	Redirect(routes.${controllerName}.show(res))
+      )
     }
   )
 }""".trim()
@@ -70,14 +73,15 @@ def save = Action { implicit request =>
 
   def saveJunctionMethod = {
     s"""
-def save = Action { implicit request =>
+def save = Action.async { implicit request =>
   ${formName}.bindFromRequest.fold(
       formWithErrors => {
-      BadRequest(views.html.${viewsPackage}.createForm(formWithErrors${formOptions}))
+      Future(BadRequest(views.html.${viewsPackage}.createForm(formWithErrors${formOptions})))
     },
     formData => {
-      ${daoObjectName}.save(formData)
-      Redirect(routes.${controllerName}.create).flashing("success" -> "${tableName.toCamelCase} saved")
+      ${daoObjectName}.save(formData).map( res =>
+      	Redirect(routes.${controllerName}.create).flashing("success" -> "${tableName.toCamelCase} saved")
+      )
     }
   )
 }""".trim()
@@ -85,15 +89,14 @@ def save = Action { implicit request =>
 
   def showMethod = {
     s"""
-def show(${makeArgsWithTypes(primaryKeyColumns)}) = Action {
-  ${daoObjectName}.findByPrimaryKey(${makeArgsWithoutTypes(primaryKeyColumns)}).fold(
-    BadRequest("Not existed")
-  ){
-    obj => {
-      ${childsFinders}
-      Ok(views.html.${viewsPackage}.show(obj${showViewOptions}))
+def show(${makeArgsWithTypes(primaryKeyColumns)}) = Action.async {
+  ${daoObjectName}.findByPrimaryKey(Some(${makeArgsWithoutTypes(primaryKeyColumns)})).map(res => res match {
+    	case None => BadRequest("Not found")
+    	case Some(obj) => {
+    	  ${childsFinders}
+      	Ok(views.html.${viewsPackage}.show(obj${showViewOptions}))
     }
-  }
+  })
 }""".trim()
   }
 
@@ -122,22 +125,26 @@ def show(${makeArgsWithTypes(primaryKeyColumns)}) = Action {
     val showArgs = makeArgsWithObjectWithoutTypes("obj", primaryKeyColumns)
 
     s"""
-def ${showByMethodName}(${makeArgsWithTypes(columns)}) = Action {
-  ${daoObjectName}.${findByMethodName}(${makeArgsWithoutTypes(columns)}).fold(
-    BadRequest("Not existed")
-  ){
-    obj => Redirect(routes.${controllerName}.show(${showArgs}))
-  }
+def ${showByMethodName}(${makeArgsWithTypes(columns)}) = Action.async {
+  ${daoObjectName}.${findByMethodName}(${makeArgsWithoutTypes(columns)}).map(res => res match {
+  	case None => BadRequest("Not existed")
+  	case Some(obj) => {
+	      Redirect(routes.${controllerName}.show(${showArgs}))
+    }
+  })
 }
 """.trim()
   }
 
   def editMethod = {
     s"""
-def edit(${makeArgsWithTypes(primaryKeyColumns)}) = Action {
-  ${daoObjectName}.findByPrimaryKey(${makeArgsWithoutTypes(primaryKeyColumns)}).map { obj =>
-      Ok(views.html.${viewsPackage}.editForm(${formName}.fill(obj)${formOptions}))
-  }.getOrElse(NotFound)
+def edit(${makeArgsWithTypes(primaryKeyColumns)}) = Action.async {
+  ${daoObjectName}.findByPrimaryKey(Some(${makeArgsWithoutTypes(primaryKeyColumns)})).map(res => res match {
+  	case None => NotFound
+  	case Some(obj) => {
+	      Ok(views.html.${viewsPackage}.editForm(${formName}.fill(obj)${formOptions}))
+    }
+  })
 }""".trim()
   }
 
@@ -146,14 +153,16 @@ def edit(${makeArgsWithTypes(primaryKeyColumns)}) = Action {
     val showArgs = makeArgsWithObjectWithoutTypes("formData", primaryKeyColumns)
 
     s"""
-def update = Action { implicit request =>
+def update = Action.async { implicit request =>
   ${formName}.bindFromRequest.fold(
       formWithErrors => {
-      BadRequest(views.html.${viewsPackage}.editForm(formWithErrors${formOptions}))
+      Future(BadRequest(views.html.${viewsPackage}.editForm(formWithErrors${formOptions})))
     },
     formData => {
-      ${daoObjectName}.update(formData)
-      Redirect(routes.${controllerName}.show(${showArgs}))
+      ${daoObjectName}.update(formData).map { res =>
+      		// Go ahead
+      }
+    	Future(Redirect(routes.${controllerName}.show(${showArgs}.get)))
     }
   )
 }""".trim()
@@ -161,9 +170,10 @@ def update = Action { implicit request =>
 
   def deleteMethod = {
     s"""
-def delete(${makeArgsWithTypes(primaryKeyColumns)}) = Action {
-  ${daoObjectName}.delete(${makeArgsWithoutTypes(primaryKeyColumns)})
-  Redirect(routes.${controllerName}.list)
+def delete(${makeArgsWithTypes(primaryKeyColumns)}) = Action.async {
+  ${daoObjectName}.delete(Some(${makeArgsWithoutTypes(primaryKeyColumns)})).map(res =>
+  	Redirect(routes.${controllerName}.list)
+  )
 }""".trim()
   }
 
@@ -182,7 +192,7 @@ def delete(${makeArgsWithTypes(primaryKeyColumns)}) = Action {
     val parentPkName = standardColumnName(parentPk)
 
     s"""
-def delete${junctionTableInfo.nameCamelCased}(${idColumns}) = Action {
+def delete${junctionTableInfo.nameCamelCased}(${idColumns}) = Action.async {
   ${junctionTableInfo.daoObjectName}.delete(${deleteArgs})
   Redirect(routes.${controllerName}.show(${parentPkName}))
 }

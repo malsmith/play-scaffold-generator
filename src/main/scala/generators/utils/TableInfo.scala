@@ -94,5 +94,41 @@ class TableInfo(val table : Table) extends GeneratorHelpers{
   val isSimpleJunctionTable = defaultIsJunctionTableCheck
 
   private def defaultIsJunctionTableCheck : Boolean = table.primaryKey.isEmpty && !columns.exists(_.options.contains(slick.ast.ColumnOption.PrimaryKey)) && foreignKeys.length == 2
+import slick.ast.ColumnOption
+  
+  lazy val desiredColumnOrder: Seq[Int] = {
+	  val withIndex = columnsPositional.zipWithIndex
+	  val cc  = withIndex(0)._1
+	  cc.options.contains(ColumnOption.AutoInc)
+	  if(true)
+    // put auto inc column last
+	    (withIndex.filterNot( _._1.options.contains(ColumnOption.AutoInc )) ++ withIndex.filter( _._1.options.contains(ColumnOption.AutoInc))).map(_._2)
+	  else
+    	withIndex.map(_._2)
+	}
+final lazy val columnsPositional: IndexedSeq[Column] = this.columns.toIndexedSeq
+/** Column code generators in the desired user-facing order. */
+final lazy val autoIncColumns: Seq[Column] = desiredColumnOrder.map(columnsPositional)
+/** Column code generators indexed by db column name */
+final lazy val columnsByName: Map[String,Column] = columns.map(c => c.name -> c).toMap
+/** Primary key code generator, if this table has one */
+// final lazy val primaryKey: Option[PrimaryKey] = primaryKey.map(PrimaryKey)
+/** Foreign key code generators */
+// final lazy val foreignKeys: Seq[ForeignKey] = model.foreignKeys.map(ForeignKey)
+/** Index code generators */
+//final lazy val indices: Seq[Index] = model.indices.map(Index)
 
+  
+/*  
+  val primaryKeyColumns : Seq[Column]= {
+    table.primaryKey match {
+      case Some(pk) => pk.columns
+      case None => primaryKeyOpt match {
+        case Some(col) => Seq(col)
+        case None => Seq(columns.head)
+      }
+    }
+  }
+
+  */
 }

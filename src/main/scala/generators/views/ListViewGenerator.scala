@@ -24,7 +24,7 @@ class ListViewGenerator(table : Table) extends ViewHelpers with GeneratorHelpers
 
   val buttonsArgs = makeArgsWithObjectWithoutTypes(tableName, primaryKeyColumns)
 
-  override val arguments = Seq((listName, "List[Tables." + tableRowName + "]"))
+  override val arguments = Seq((listName, "List[models." + tableRowName + "]"))
 
   override def imports: String = ""
 
@@ -85,9 +85,9 @@ class ListViewGenerator(table : Table) extends ViewHelpers with GeneratorHelpers
   def buttons = {
     s"""
 <div class="btn-group">
-  <a href="@routes.${controllerName}.show(${buttonsArgs})" class="btn btn-success">Show</a>
-  <a href="@routes.${controllerName}.edit(${buttonsArgs})" class="btn btn-warning">Edit</a>
-  <a href="@routes.${controllerName}.delete(${buttonsArgs})" class="btn btn-danger">Delete</a>
+  <a href="@routes.${controllerName}.show(${buttonsArgs}.get)" class="btn btn-success">Show</a>
+  <a href="@routes.${controllerName}.edit(${buttonsArgs}.get)" class="btn btn-warning">Edit</a>
+  <a href="@routes.${controllerName}.delete(${buttonsArgs}.get)" class="btn btn-danger">Delete</a>
 </div>
 """.trim()
   }

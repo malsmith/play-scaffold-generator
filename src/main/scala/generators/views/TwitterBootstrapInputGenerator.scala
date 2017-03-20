@@ -16,11 +16,11 @@ s"""
 **************************************************@
 
 <div class="clearfix @elements.args.get('_class) @if(elements.hasErrors) {error}" id="@elements.args.get('_id).getOrElse(elements.id + "_field")">
-    <label for="@elements.id">@elements.label(elements.lang)</label>
+    <label for="@elements.id">@elements.label</label>
     <div class="input">
         @elements.input
-        <span class="help-inline">@elements.errors(elements.lang).mkString(", ")</span>
-        <span class="help-block">@elements.infos(elements.lang).mkString(", ")</span>
+        <span class="help-inline">@elements.errors.mkString(", ")</span>
+        <span class="help-block">@elements.infos.mkString(", ")</span>
     </div>
 </div>
  """.trim

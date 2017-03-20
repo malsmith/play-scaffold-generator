@@ -33,7 +33,7 @@ class CreateFormViewGenerator(table : Table) extends ViewHelpers with FormViewGe
     }
   }
 
-  override val arguments = Seq((formName, "Form[Tables." + tableRowName + "]")) ++ selectFormOptionsArgs
+  override val arguments = Seq((formName, "Form[models." + tableRowName + "]")) ++ selectFormOptionsArgs
 
   override val autoIncDefaultValue = "0"
 

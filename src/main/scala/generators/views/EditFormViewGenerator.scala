@@ -33,7 +33,7 @@ class EditFormViewGenerator(table : Table) extends ViewHelpers with FormViewGene
     }
   }
 
-  override val arguments = Seq((formName, "Form[Tables." + tableRowName + "]")) ++ selectFormOptionsArgs
+  override val arguments = Seq((formName, "Form[models." + tableRowName + "]")) ++ selectFormOptionsArgs
 
   val implicitFieldConstructor = "@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }"
 
