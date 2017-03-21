@@ -112,10 +112,9 @@ s"""
 """.trim()
       } else ""
     }
-
+    // ${childsCode}
     s"""
 def delete(${methodArgs}) = db.run {
-  ${childsCode}
   ${findQuery}(${queryArgs}).delete
 }""".trim()
   }
@@ -294,10 +293,11 @@ def ${findByMethodName}(${findByMethodArgs}) : List[${tableRowName}] = {
     val byName = id.capitalize
 
     s"""
-def formOptionsBy${byName} : Seq[(String, String)] = {
-  ${queryObjectName}.list.map{ row =>
-    (row.${id}.toString, ${fieldsForSimpleName.map("row." + _).mkString(" + \" \" + ")})
-  }
+def formOptionsBy${byName} : Future[List[(String, String)]] = {
+	val result = Await.result(db.run(${queryObjectName}.to[List].result),Duration.Inf)
+  Future(result.map{ row =>
+    (row.${id}.get.toString, ${fieldsForSimpleName.map("row." + _).mkString(" + \" \" + ")})
+  })
 }""".trim()
   }
   

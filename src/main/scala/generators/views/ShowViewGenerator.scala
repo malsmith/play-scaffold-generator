@@ -39,7 +39,7 @@ class ShowViewGenerator(table : Table, foreignKeyInfo : ForeignKeyInfo) extends 
 
     val listName = tabInfo.nameCamelCasedUncapitalized + "sBy" + makeColumnsAndString(table._2.referencingColumns)
 
-    (listName, s"List[Tables.${tabInfo.tableRowName}]")
+    (listName, s"List[models.${tabInfo.tableRowName}]")
   }
 
   override val arguments = Seq((tableName, "models." + tableRowName)) ++ childsViewArgs
@@ -192,7 +192,7 @@ class ShowViewGenerator(table : Table, foreignKeyInfo : ForeignKeyInfo) extends 
             <tr>
                 ${childFields(childTableName, tableInfo.listColumns)}
                 <td class="text-center">
-                    <a href="@routes.${tableInfo.controllerName}.show(${showArgs})" class="btn btn-info btn-sm">Show</a>
+                    <a href="@routes.${tableInfo.controllerName}.show(${showArgs}.get)" class="btn btn-info btn-sm">Show</a>
                 </td>
             </tr>
             }

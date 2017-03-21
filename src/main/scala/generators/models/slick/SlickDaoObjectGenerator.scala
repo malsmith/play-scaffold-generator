@@ -5,6 +5,7 @@ import generators.utils._
 import slick.model.{Column, Table}
 
 import slick.model.ForeignKeyAction._
+import slick.ast.ColumnOption
 
 object SlickDaoObjectGenerator {
   def generate(outputFolder : String) = {
@@ -42,7 +43,7 @@ class SlickDaoObjectGenerator(table : Table, foreignKeyInfo : ForeignKeyInfo) ex
 
   override val fieldsForSimpleName = {
     mainTableInfo.selectColumns.map{ col =>
-      if(col.nullable) standardColumnName(col.name) + ".getOrElse(\"\")"
+      if(col.nullable || col.options.contains(ColumnOption.AutoInc)) standardColumnName(col.name) + ".getOrElse(\"\")"
       else standardColumnName(col.name)
     }
   }
@@ -59,6 +60,9 @@ import models._
 import play.api.db.slick.{ DatabaseConfigProvider, HasDatabaseConfigProvider }
 import slick.driver.JdbcProfile
 import scala.concurrent.Future
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 @Singleton()
 class ${modelObjectName}Dao @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) extends TablesDef with HasDatabaseConfigProvider[JdbcProfile] {

@@ -45,10 +45,14 @@ def list = Action.async {
 }""".trim()
   }
 
+  def varList = if (parentDaoObjectsAndReferencedColumn.length > 0) ", "+ parentDaoObjectsAndReferencedColumn.map(data => "Await.result("+ data._1.daoObjectName.uncapitalize + ".formOptionsBy" + makeColumnsAndString(Seq(data._2))+",Duration.Inf)").mkString(", ") else ""
+
+  
   def createMethod = {
+  	// Await.result(employeeDao.formOptionsById,Duration.Inf)
     s"""
 def create = Action { implicit request =>
-  Ok(views.html.${viewsPackage}.createForm(${formName}${formOptions}))
+  Ok(views.html.${viewsPackage}.createForm(${formName}${varList}))
 }""".trim()
   }
 
@@ -60,7 +64,7 @@ def create = Action { implicit request =>
 def save = Action.async { implicit request =>
   ${formName}.bindFromRequest.fold(
       formWithErrors => {
-      Future(BadRequest(views.html.${viewsPackage}.createForm(formWithErrors${formOptions})))
+      Future(BadRequest(views.html.${viewsPackage}.createForm(formWithErrors${varList})))
     },
     formData => {
       ${daoObjectName}.save(formData).map ( res =>
@@ -76,7 +80,7 @@ def save = Action.async { implicit request =>
 def save = Action.async { implicit request =>
   ${formName}.bindFromRequest.fold(
       formWithErrors => {
-      Future(BadRequest(views.html.${viewsPackage}.createForm(formWithErrors${formOptions})))
+      Future(BadRequest(views.html.${viewsPackage}.createForm(formWithErrors${varList})))
     },
     formData => {
       ${daoObjectName}.save(formData).map( res =>
@@ -113,7 +117,7 @@ def show(${makeArgsWithTypes(primaryKeyColumns)}) = Action.async {
 
     val findMethodArgs = makeArgsWithObjectWithoutTypes("obj", fk.referencedColumns)
 
-    s"val ${childName} = ${child.daoObjectName}.${findMethod}(${findMethodArgs})"
+    s"val ${childName} = Await.result(${child.daoObjectName.uncapitalize}.${findMethod}(${findMethodArgs}.get),Duration.Inf)"
   }
 
   def showUniqueMethod(columns : Seq[Column]) = {
@@ -135,14 +139,15 @@ def ${showByMethodName}(${makeArgsWithTypes(columns)}) = Action.async {
 }
 """.trim()
   }
-
+  
   def editMethod = {
+
     s"""
 def edit(${makeArgsWithTypes(primaryKeyColumns)}) = Action.async {
   ${daoObjectName}.findByPrimaryKey(Some(${makeArgsWithoutTypes(primaryKeyColumns)})).map(res => res match {
   	case None => NotFound
   	case Some(obj) => {
-	      Ok(views.html.${viewsPackage}.editForm(${formName}.fill(obj)${formOptions}))
+	      Ok(views.html.${viewsPackage}.editForm(${formName}.fill(obj)${varList}))
     }
   })
 }""".trim()
@@ -156,7 +161,7 @@ def edit(${makeArgsWithTypes(primaryKeyColumns)}) = Action.async {
 def update = Action.async { implicit request =>
   ${formName}.bindFromRequest.fold(
       formWithErrors => {
-      Future(BadRequest(views.html.${viewsPackage}.editForm(formWithErrors${formOptions})))
+      Future(BadRequest(views.html.${viewsPackage}.editForm(formWithErrors${varList})))
     },
     formData => {
       ${daoObjectName}.update(formData).map { res =>
