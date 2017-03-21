@@ -112,7 +112,9 @@ class ${objectName} @Inject()(${daoObjectName}: ${daoTypeName}${injectChildList}
 				importCode("scala.concurrent.Future"),
 				importCode("scala.concurrent.Await"),
 				importCode("scala.concurrent.duration._"),
-				importCode("play.api.libs.concurrent.Execution.Implicits.defaultContext")
+				importCode("play.api.libs.concurrent.Execution.Implicits.defaultContext"),
+				importCode("play.api.libs.json._"),
+				importCode("utils.JsonFormat._")
 				)
         
         .mkString("\n")

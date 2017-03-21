@@ -1,5 +1,5 @@
 import generators.models.anorm._
-import generators.models.slick.{DbSessionGenerator, TablesGenerator, SlickDaoObjectGenerator}
+import generators.models.slick.{DbSessionGenerator, TablesGenerator, SlickDaoObjectGenerator,JsonGenerator}
 import generators.models.squeryl.{GlobalObjectGenerator, SquerylDaoObjectGenerator, SchemaGenerator}
 import generators.views.ViewGenerator
 import generators.utils.{AppConfigParser, TablesConfigParser}
@@ -34,6 +34,12 @@ object ScaffoldPlugin extends Plugin {
     TablesGenerator.generate(outputDir)
 
     stream.log.info("Generating tables completed....")
+
+    JsonGenerator.generate(outputDir,appConfig.utilsPackage)
+
+    stream.log.info("Generating Json Formatters completed....")
+
+    
     DbSessionGenerator.writeToFile(outputDir, appConfig.utilsPackage)
 
     stream.log.info("Generating DB session helper completed....")

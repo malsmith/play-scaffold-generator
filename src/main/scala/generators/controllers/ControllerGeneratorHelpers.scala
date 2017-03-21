@@ -26,7 +26,7 @@ trait ControllerGeneratorHelpers extends GeneratorHelpers{
     s"""
 def index = Action.async {
   Future(Redirect(routes.${controllerName}.list))
-}""".trim()
+}""".rtrim
   }
 
   def indexJunctionMethod = {
