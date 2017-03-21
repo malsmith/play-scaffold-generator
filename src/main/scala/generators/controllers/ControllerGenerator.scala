@@ -83,8 +83,8 @@ ${objectCode(controllerName)}
   override def indent(code: String): String = code
 
   def objectCode(objectName : String) : String = {
-  	val injectChildList = if (childsData.length>0) ", " + childsData.map(r => s"${r._2.referencingTable.table}Dao : ${r._2.referencingTable.table.capitalize}Dao").mkString(",") else ""
-  	val injectParentList = if (parentDaoObjectsAndReferencedColumn.length > 0) ", " + parentDaoObjectsAndReferencedColumn.map(pp => s"${pp._1.nameCamelCasedUncapitalized.uncapitalize}Dao : ${pp._1.nameCamelCased}Dao").mkString(",") else ""
+  	val injectChildList = if (childsData.length>0) ", " + childsData.map(r => s"${r._2.referencingTable.table.toCamelCase.uncapitalize}Dao : ${r._2.referencingTable.table.toCamelCase.capitalize}Dao").distinct.mkString(",") else ""
+  	val injectParentList = if (parentDaoObjectsAndReferencedColumn.length > 0) ", " + parentDaoObjectsAndReferencedColumn.map(pp => s"${pp._1.nameCamelCasedUncapitalized.uncapitalize}Dao : ${pp._1.nameCamelCased}Dao").distinct.mkString(",") else ""
     s"""
 class ${objectName} @Inject()(${daoObjectName}: ${daoTypeName}${injectChildList}${injectParentList}, val messagesApi: MessagesApi) extends Controller with I18nSupport {      
 // object  extends Controller {
